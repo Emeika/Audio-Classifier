@@ -4,9 +4,10 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import accuracy_score, classification_report
 import numpy as np
+import joblib
 
 # Load the training data
-train_data = pd.read_csv('data/mfcc_features_train.csv')
+train_data = pd.read_csv('../data/mfcc_features_train.csv')
 
 # Split the data into features and labels
 X = train_data.iloc[:, 2:-1]  # Assuming the features start from the 3rd column
@@ -66,6 +67,6 @@ print(f'Validation Accuracy: {accuracy:.2f}')
 # Print classification report for more detailed metrics
 print(classification_report(y_val, y_pred))
 
-# Save the trained model
-import joblib
-joblib.dump(mlp, 'results/models/mlp_model_extended.pkl')
+# Save the trained model and the scaler
+joblib.dump(mlp, '../results/models/mlp_model_extended.pkl')
+joblib.dump(scaler, '../results/scalers/mlp_scaler.pkl')
