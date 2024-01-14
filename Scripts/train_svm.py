@@ -7,7 +7,7 @@ import joblib
 import pandas as pd
 
 # Load preprocessed data
-data = pd.read_csv("data/mfcc_features_train.csv")
+data = pd.read_csv("../data/mfcc_features_train.csv")
 X = data.iloc[:, 2:-1]
 y = data["ClassID"]
 
@@ -42,13 +42,14 @@ best_params = grid_search.best_params_
 final_svm_model = SVC(**best_params)
 final_svm_model.fit(X_train_scaled, y_train)
 
+# Save the trained SVM model and the scaler
+joblib.dump(final_svm_model, "../results/models/svm_model.pkl")
+joblib.dump(scaler, "../results/models/svm_scaler.pkl")
+
 # Evaluate the model on the validation set
 y_val_pred = final_svm_model.predict(X_val_scaled)
 accuracy = accuracy_score(y_val, y_val_pred)
 print(f"Validation Accuracy: {accuracy:.2f}")
-
-# Save the trained SVM model
-joblib.dump(final_svm_model, "results/models/svm_model.pkl")
 
 # Print the best parameters
 print("Best Parameters:", best_params)
