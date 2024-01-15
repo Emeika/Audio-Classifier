@@ -2,28 +2,43 @@
 from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
 from sklearn.metrics import accuracy_score, f1_score
+from sklearn.preprocessing import StandardScaler
 import joblib
 import pandas as pd
 
-# Assume you have your dataset in X (features) and y (target)
-data = pd.read_csv('../Data/mfcc_features_train.csv')
+# Load the stratified training and validation data
+train_data = pd.read_csv('Kek\Data\stratified_training_set.csv')
+val_data = pd.read_csv('Kek\Data\stratified_validation_set.csv')
 
-# Skip the first two columns (assuming they are not needed as features)
-X = data.iloc[:, 2:].drop('ClassID', axis=1)  # Drop 'ClassID' column
-y = data['ClassID']
+# Assuming the features start from the 3rd column
+X_train = train_data.iloc[:, 2:-1]
+y_train = train_data['ClassID']
 
-# Split the dataset into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_val = val_data.iloc[:, 2:-1]
+y_val = val_data['ClassID']
+
+# Feature Scaling
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_val_scaled = scaler.transform(X_val)
 
 # XGBoost Classifier
 xgb_classifier = XGBClassifier(random_state=42)
-xgb_classifier.fit(X_train, y_train)
-xgb_predictions = xgb_classifier.predict(X_test)
-xgb_accuracy = accuracy_score(y_test, xgb_predictions)
-xgb_f1 = f1_score(y_test, xgb_predictions, average='weighted')
+xgb_classifier.fit(X_train_scaled, y_train)
 
-print("XGBoost Accuracy:", xgb_accuracy)
-print("XGBoost F1 Score:", xgb_f1)
+# Training Accuracy
+train_predictions = xgb_classifier.predict(X_train_scaled)
+train_accuracy = accuracy_score(y_train, train_predictions)
+print("Training Accuracy:", train_accuracy)
 
-# Save the trained XGBoost model to a file using joblib
-joblib.dump(xgb_classifier, '../results/models/xgboost_model.pkl')
+# Validation Accuracy and F1 Score
+xgb_predictions = xgb_classifier.predict(X_val_scaled)
+xgb_accuracy = accuracy_score(y_val, xgb_predictions)
+xgb_f1 = f1_score(y_val, xgb_predictions, average='weighted')
+
+print("XGBoost Validation Accuracy:", xgb_accuracy)
+print("XGBoost Validation F1 Score:", xgb_f1)
+
+# Save the trained XGBoost model and scaler to files using joblib
+joblib.dump(xgb_classifier, 'Kek/results/models/xgboost_model_with_scaling.pkl')
+joblib.dump(scaler, 'Kek/results/scalers/xgboost_model_with_scaling_scaler_xgb.pkl')

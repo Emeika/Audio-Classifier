@@ -1,20 +1,20 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import accuracy_score, classification_report
 import numpy as np
 import joblib
 
-# Load the training data
-train_data = pd.read_csv('../data/mfcc_features_train.csv')
+# Load the augmented training data
+train_data = pd.read_csv('../data/stratified_training_set.csv')
+val_data = pd.read_csv('../data/stratified_validation_set.csv')
 
 # Split the data into features and labels
-X = train_data.iloc[:, 2:-1]  # Assuming the features start from the 3rd column
-y = train_data['ClassID']
+X_train = train_data.iloc[:, 2:-1]  # Assuming the features start from the 3rd column
+y_train = train_data['ClassID']
 
-# Split the data into training and validation sets
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_val = val_data.iloc[:, 2:-1]  # Assuming the features start from the 3rd column
+y_val = val_data['ClassID']
 
 # Standardize the features (important for neural networks)
 scaler = StandardScaler()
@@ -50,7 +50,7 @@ mlp = MLPClassifier(
     learning_rate='adaptive',         # Adaptive learning rate
     max_iter=200,                      # Maximum number of iterations
     early_stopping=True,              # Enable early stopping
-    validation_fraction=0.1,          # Fraction of training data to use as validation set
+    validation_fraction=0.1,          # Fraction of training data to use as a validation set
     n_iter_no_change=10,              # Number of iterations with no improvement to wait for early stopping
     random_state=42
 )
@@ -68,5 +68,5 @@ print(f'Validation Accuracy: {accuracy:.2f}')
 print(classification_report(y_val, y_pred))
 
 # Save the trained model and the scaler
-joblib.dump(mlp, '../results/models/mlp_model_extended.pkl')
+joblib.dump(mlp, '../results/models/mlp_model.pkl')
 joblib.dump(scaler, '../results/scalers/mlp_scaler.pkl')
